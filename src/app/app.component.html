@@ -1,0 +1,157 @@
+<h1>异步表单验证</h1>
+<form [formGroup]="registorForm" (ngSubmit)="formSubmitSubject$.next()">
+  <div class="form-group">
+    <label class="control-label">账号(123重复)</label>
+    <input class="form-control"
+      [ngClass]="{'is-invalid': registorForm.controls['account'].invalid && (registorForm.controls['account'].dirty || registorForm.controls['account'].touched)}"
+      type="text" placeholder="" formControlName="account" />
+    <div class="invalid-feedback" *ngIf="registorForm.controls['account'].errors?.message">
+      {{registorForm.controls['account'].errors.message}}
+    </div>
+  </div>
+  <div>
+    <label>密码</label>
+    <input class="form-control" type=“password” placeholder="" />
+  </div>
+  <div>
+    <label>确认密码</label>
+    <input class="form-control" type=“password” placeholder="" />
+  </div>
+  <div>
+    <button type="button" class="btn btn-info">暂存</button>
+    <button class="btn btn-primary" type="button" (click)="submit()">
+      提交
+    </button>
+    <!-- <button class="btn btn-primary" type="button"  (click)="submit()" disabled>
+      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      提交
+    </button> -->
+    <button type="reset" class="btn btn-default">重置</button>
+  </div>
+</form>
+
+<h1>加减动态表单验证， 单个, FormArray方法, 历史有数组的数据, array与表单同步关联</h1>
+<!-- <form>  有这个标签包住的话，需要为input加上name -->
+<div [formGroup]="dynamicForm" class="container">
+  <label class="control-label">名字</label>
+  <div class="form-group row">
+    <input class="form-control"
+      [ngClass]="{'is-invalid': dynamicForm.controls['name'].invalid && (dynamicForm.controls['name'].dirty || dynamicForm.controls['name'].touched)}"
+      type="text" formControlName="name" placeholder="" />
+    <div class="invalid-feedback" *ngIf="dynamicForm.controls['name'].errors?.required">请输入</div>
+  </div>
+</div>
+<div [formGroup]="dynamicForm" class="container">
+  <label class="control-label">卡号<button (click)="dynamicAdd()">+</button></label>
+  <ng-container formArrayName="cardArray">
+    <div class="form-group row" *ngFor="let item of dynamicList;let control of cardDynamicForm.controls;let i = index">
+      <!--ngmodel 是为了另外的数组联动-->
+      <input
+        [ngClass]="{'is-invalid': cardDynamicForm.controls[i].invalid && (cardDynamicForm.controls[i].dirty || cardDynamicForm.controls[i].touched)}"
+        class="form-control col-8" type="text" placeholder="" formControlName="{{i}}" [(ngModel)]="item.code" />
+      <div class="col-4">
+        <button (click)="dynamicReduce(i)">-</button>
+      </div>
+      <div class="invalid-feedback" *ngIf="cardDynamicForm.controls[i].errors?.message">
+        {{cardDynamicForm.controls[i].errors.message}}
+      </div>
+    </div>
+
+  </ng-container>
+</div>
+
+<div class="container">
+  <button type="submit" class="btn btn-primary" (click)="dynamicSubmit()">提交</button>
+</div>
+
+
+<h1>加减动态表单验证， 单个, formGroup</h1>
+<div [formGroup]="groupDynamicForm" class="container">
+  <label class="control-label">名字</label>
+  <div class="form-group row">
+    <input class="form-control"
+      [ngClass]="{'is-invalid': groupDynamicForm.controls['name'].invalid && (groupDynamicForm.controls['name'].dirty || groupDynamicForm.controls['name'].touched)}"
+      type="text" formControlName="name" placeholder="" />
+    <div class="invalid-feedback" *ngIf="groupDynamicForm.controls['name'].errors?.required">请输入</div>
+  </div>
+</div>
+<div [formGroup]="transferFormGroup" class="container">
+  <label class="control-label">卡号<button (click)="addGroup()">+</button></label>
+  <ng-container *ngFor="let item of dynamicGroupList;let i = index">
+    <div class="form-group row" [formGroupName]="item.id">
+      <input
+        [ngClass]="{'is-invalid': transferFormGroup.controls[i].controls['code'].invalid && (transferFormGroup.controls[i].controls['code'].dirty || transferFormGroup.controls[i].controls['code'].touched)}"
+        class="form-control col-8" type="text" placeholder="" formControlName="code" />
+      <div class="col-4">
+        <button (click)="removeGroup(i)">-</button>
+      </div>
+      <div class="invalid-feedback" *ngIf="transferFormGroup.controls[i].controls['code'].errors?.message">
+        {{transferFormGroup.controls[i].controls['code'].errors.message}}
+      </div>
+    </div>
+  </ng-container>
+</div>
+
+<h1>接口返回字段遍历表单验证</h1>
+
+<form [formGroup]="eachForm">
+  <div class="form-group row" *ngFor="let item of backData;let i = index;">
+    <label class="control-label" class="col-2">{{item.name}}</label>
+    <div class="col-8">
+      <input class="form-control"
+        [ngClass]="{'is-invalid': eachForm.controls[item.key].invalid && (eachForm.controls[item.key].dirty || eachForm.controls[item.key].touched)}"
+        type="text" placeholder="" formControlName="{{item.key}}" />
+      <div class="invalid-feedback" *ngIf="eachForm.controls[item.key].errors?.required">请输入</div>
+    </div>
+  </div>
+  <div>
+    <button type="submit" class="btn btn-primary" (click)="eachSubmit()">提交</button>
+  </div>
+</form>
+<h1>根据条件验证</h1>
+
+<div >
+  <div class="form-group form-check">
+    <input type="checkbox" class="form-check-input" id="exampleCheck1"  (change)="checkChange($event, 1)" [(ngModel)]="isChecked">
+    <label class="form-check-label" for="exampleCheck1">必填</label>
+  </div>
+  <div class="form-group row" [formGroup]="conditionalForm">
+    <label class="control-label" class="col-2">姓名</label>
+    <div class="col-8">
+      <input class="form-control" formControlName="name"
+        [ngClass]="{'is-invalid': conditionalForm.controls['name'].invalid && (conditionalForm.controls['name'].dirty || conditionalForm.controls['name'].touched)}" />
+      <div class="invalid-feedback">{{conditionalForm.controls['name'].errors?.message}}</div>
+    </div>
+  </div>
+  <div>
+    <button type="submit" class="btn btn-primary" (click)="conditionalFormSubmit()">提交</button>
+  </div>
+</div>
+
+<h1>比较验证</h1>
+
+<div [formGroup]="compareForm">
+  <div class="form-group row">
+    <label class="control-label" class="col-2">最小</label>
+    <div class="col-8">
+      <input class="form-control" formControlName="min"
+        [ngClass]="{'is-invalid': compareForm.controls['min'].invalid && (compareForm.controls['min'].dirty || compareForm.controls['min'].touched)}" />
+      <div class="invalid-feedback">{{compareForm.controls['min'].errors?.message}}</div>
+    </div>
+  </div>
+  <div class="form-group row">
+    <label class="control-label" class="col-2">最大</label>
+    <div class="col-8">
+      <!-- <input class="form-control" formControlName="max" [ngClass]="{'is-invalid': (compareForm.controls['max'].invalid && (compareForm.controls['max'].dirty || compareForm.controls['max'].touched) || compareForm.errors?.compareMessage)}" /> -->
+      <input class="form-control" formControlName="max"
+        [ngClass]="{'is-invalid': ((compareForm.controls['max'].invalid && (compareForm.controls['max'].dirty || compareForm.controls['max'].touched)) || ((compareForm.invalid && (compareForm.dirty || compareForm.touched)) && compareForm.errors?.compareMessage))}" />
+      <div class="invalid-feedback" *ngIf="compareForm.controls['max'].errors?.message">
+        {{compareForm.controls['max'].errors?.message}}</div>
+      <div class="invalid-feedback" *ngIf="compareForm.errors?.compareMessage">{{compareForm.errors?.compareMessage}}
+      </div>
+    </div>
+  </div>
+  <div>
+    <button type="submit" class="btn btn-primary" (click)="compareFormSubmit()">提交</button>
+  </div>
+</div>
